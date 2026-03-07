@@ -27,7 +27,7 @@ function walk(node, depth) {
     }
     return entry;
 }
-return JSON.stringify(walk(document.body, 0));
+return walk(document.body, 0);
 "#;
 
 /// Click an element matching a CSS selector, falling back to text match.
