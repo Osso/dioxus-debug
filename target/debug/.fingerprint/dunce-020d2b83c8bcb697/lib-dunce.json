@@ -1,1 +1,0 @@
-{"rustc":14586432835443788270,"features":"[]","declared_features":"[]","target":2507403751003635712,"profile":2241668132362809309,"path":16444921721331000738,"deps":[],"local":[{"CheckDepInfo":{"dep_info":"debug/.fingerprint/dunce-020d2b83c8bcb697/dep-lib-dunce","checksum":false}}],"rustflags":["-C","link-arg=-Wl,--threads=4"],"config":2069994364910194474,"compile_kind":0}
