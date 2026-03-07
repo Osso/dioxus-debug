@@ -1,0 +1,13 @@
+/syncthing/Sync/Projects/lib/dioxus-debug/target/debug/deps/uuid-e3fe0de85023a9c9.d: /home/osso/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/uuid-1.22.0/src/lib.rs /home/osso/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/uuid-1.22.0/src/macros.rs /home/osso/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/uuid-1.22.0/src/builder.rs /home/osso/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/uuid-1.22.0/src/error.rs /home/osso/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/uuid-1.22.0/src/non_nil.rs /home/osso/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/uuid-1.22.0/src/parser.rs /home/osso/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/uuid-1.22.0/src/fmt.rs /home/osso/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/uuid-1.22.0/src/timestamp.rs /home/osso/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/uuid-1.22.0/src/external.rs
+
+/syncthing/Sync/Projects/lib/dioxus-debug/target/debug/deps/libuuid-e3fe0de85023a9c9.rmeta: /home/osso/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/uuid-1.22.0/src/lib.rs /home/osso/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/uuid-1.22.0/src/macros.rs /home/osso/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/uuid-1.22.0/src/builder.rs /home/osso/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/uuid-1.22.0/src/error.rs /home/osso/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/uuid-1.22.0/src/non_nil.rs /home/osso/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/uuid-1.22.0/src/parser.rs /home/osso/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/uuid-1.22.0/src/fmt.rs /home/osso/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/uuid-1.22.0/src/timestamp.rs /home/osso/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/uuid-1.22.0/src/external.rs
+
+/home/osso/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/uuid-1.22.0/src/lib.rs:
+/home/osso/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/uuid-1.22.0/src/macros.rs:
+/home/osso/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/uuid-1.22.0/src/builder.rs:
+/home/osso/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/uuid-1.22.0/src/error.rs:
+/home/osso/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/uuid-1.22.0/src/non_nil.rs:
+/home/osso/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/uuid-1.22.0/src/parser.rs:
+/home/osso/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/uuid-1.22.0/src/fmt.rs:
+/home/osso/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/uuid-1.22.0/src/timestamp.rs:
+/home/osso/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/uuid-1.22.0/src/external.rs:

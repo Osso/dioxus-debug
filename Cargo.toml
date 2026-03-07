@@ -1,0 +1,25 @@
+[package]
+name = "dioxus-debug"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.89"
+
+[dependencies]
+peercred-ipc = { git = "https://github.com/Osso/peercred-ipc.git", tag = "v0.2.0", optional = true }
+serde = { version = "1", features = ["derive"] }
+serde_json = { version = "1", optional = true }
+tokio = { version = "1", features = ["sync", "time"], optional = true }
+glob = { version = "0.3", optional = true }
+libc = { version = "0.2", optional = true }
+dioxus = { version = "0.7", features = ["desktop"], optional = true }
+base64 = { version = "0.22", optional = true }
+
+[features]
+default = []
+server = ["dep:peercred-ipc", "dep:serde_json", "dep:tokio", "dep:libc", "dep:dioxus", "dep:glob"]
+client = ["dep:peercred-ipc", "dep:serde_json", "dep:glob", "dep:base64"]
+script = ["client", "dep:tokio"]
+
+[[example]]
+name = "cli"
+required-features = ["client", "script"]
