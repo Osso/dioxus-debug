@@ -21,8 +21,7 @@ pub fn parse_script(text: &str) -> Result<Vec<ScriptCommand>, String> {
         if line.is_empty() || line.starts_with('#') {
             continue;
         }
-        let cmd = parse_line(line)
-            .map_err(|e| format!("Line {}: {}", i + 1, e))?;
+        let cmd = parse_line(line).map_err(|e| format!("Line {}: {}", i + 1, e))?;
         commands.push(cmd);
     }
     Ok(commands)

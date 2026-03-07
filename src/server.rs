@@ -6,11 +6,25 @@ use tokio::sync::{mpsc, oneshot};
 
 #[derive(Debug)]
 pub enum Command {
-    Dump { respond: oneshot::Sender<String> },
-    Click { selector: String, respond: oneshot::Sender<Result<(), String>> },
-    Input { selector: String, value: String, respond: oneshot::Sender<Result<(), String>> },
-    Eval { js: String, respond: oneshot::Sender<Result<String, String>> },
-    Screenshot { respond: oneshot::Sender<Result<String, String>> },
+    Dump {
+        respond: oneshot::Sender<String>,
+    },
+    Click {
+        selector: String,
+        respond: oneshot::Sender<Result<(), String>>,
+    },
+    Input {
+        selector: String,
+        value: String,
+        respond: oneshot::Sender<Result<(), String>>,
+    },
+    Eval {
+        js: String,
+        respond: oneshot::Sender<Result<String, String>>,
+    },
+    Screenshot {
+        respond: oneshot::Sender<Result<String, String>>,
+    },
 }
 
 pub type CommandReceiver = mpsc::Receiver<Command>;
@@ -33,25 +47,33 @@ impl Drop for SocketGuard {
 }
 
 fn cleanup_stale_sockets() {
-    let pattern = "/tmp/dioxus-debug-*.sock";
-    if let Ok(entries) = glob::glob(pattern) {
-        for entry in entries.flatten() {
-            if let Some(filename) = entry.file_name().and_then(|f| f.to_str()) {
-                if let Some(pid_str) = filename
-                    .strip_prefix("dioxus-debug-")
-                    .and_then(|s| s.strip_suffix(".sock"))
-                {
-                    if let Ok(pid) = pid_str.parse::<i32>() {
-                        let exists = unsafe { libc::kill(pid, 0) } == 0;
-                        if !exists {
-                            if std::fs::remove_file(&entry).is_ok() {
-                                eprintln!("[dioxus-debug] Cleaned up stale socket: {}", entry.display());
-                            }
-                        }
-                    }
-                }
-            }
-        }
+    let Ok(entries) = glob::glob("/tmp/dioxus-debug-*.sock") else {
+        return;
+    };
+    for entry in entries.flatten() {
+        cleanup_socket_if_stale(&entry);
+    }
+}
+
+fn cleanup_socket_if_stale(entry: &std::path::Path) {
+    let Some(filename) = entry.file_name().and_then(|f| f.to_str()) else {
+        return;
+    };
+    let Some(pid_str) = filename
+        .strip_prefix("dioxus-debug-")
+        .and_then(|s| s.strip_suffix(".sock"))
+    else {
+        return;
+    };
+    let Ok(pid) = pid_str.parse::<i32>() else {
+        return;
+    };
+    let alive = unsafe { libc::kill(pid, 0) } == 0;
+    if !alive && std::fs::remove_file(entry).is_ok() {
+        eprintln!(
+            "[dioxus-debug] Cleaned up stale socket: {}",
+            entry.display()
+        );
     }
 }
 
@@ -130,11 +152,18 @@ async fn dispatch_request(
             handle_string_command(conn, cmd_tx, cmd).await;
         }
         Request::Click { selector } => {
-            let cmd = |tx| Command::Click { selector, respond: tx };
+            let cmd = |tx| Command::Click {
+                selector,
+                respond: tx,
+            };
             send_result_command(conn, cmd_tx, cmd, 2).await;
         }
         Request::Input { selector, value } => {
-            let cmd = |tx| Command::Input { selector, value, respond: tx };
+            let cmd = |tx| Command::Input {
+                selector,
+                value,
+                respond: tx,
+            };
             send_result_command(conn, cmd_tx, cmd, 2).await;
         }
         Request::Eval { js } => {
@@ -164,8 +193,12 @@ async fn handle_string_command<F>(
         return;
     }
     match tokio::time::timeout(std::time::Duration::from_secs(5), rx).await {
-        Ok(Ok(s)) => { let _ = conn.write(&Response::Dom(s)).await; }
-        _ => { let _ = conn.write(&Response::Error("Timeout".into())).await; }
+        Ok(Ok(s)) => {
+            let _ = conn.write(&Response::Dom(s)).await;
+        }
+        _ => {
+            let _ = conn.write(&Response::Error("Timeout".into())).await;
+        }
     }
 }
 
@@ -183,9 +216,15 @@ async fn send_result_command<F>(
         return;
     }
     match tokio::time::timeout(std::time::Duration::from_secs(timeout_secs), rx).await {
-        Ok(Ok(Ok(()))) => { let _ = conn.write(&Response::Ok).await; }
-        Ok(Ok(Err(e))) => { let _ = conn.write(&Response::Error(e)).await; }
-        _ => { let _ = conn.write(&Response::Error("Timeout".into())).await; }
+        Ok(Ok(Ok(()))) => {
+            let _ = conn.write(&Response::Ok).await;
+        }
+        Ok(Ok(Err(e))) => {
+            let _ = conn.write(&Response::Error(e)).await;
+        }
+        _ => {
+            let _ = conn.write(&Response::Error("Timeout".into())).await;
+        }
     }
 }
 
@@ -202,8 +241,14 @@ async fn handle_eval_command<F>(
         return;
     }
     match tokio::time::timeout(std::time::Duration::from_secs(5), rx).await {
-        Ok(Ok(Ok(s))) => { let _ = conn.write(&Response::EvalResult(s)).await; }
-        Ok(Ok(Err(e))) => { let _ = conn.write(&Response::Error(e)).await; }
-        _ => { let _ = conn.write(&Response::Error("Timeout".into())).await; }
+        Ok(Ok(Ok(s))) => {
+            let _ = conn.write(&Response::EvalResult(s)).await;
+        }
+        Ok(Ok(Err(e))) => {
+            let _ = conn.write(&Response::Error(e)).await;
+        }
+        _ => {
+            let _ = conn.write(&Response::Error("Timeout".into())).await;
+        }
     }
 }

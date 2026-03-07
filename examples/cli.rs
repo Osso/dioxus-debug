@@ -58,11 +58,15 @@ fn resolve_socket(args: &[String]) -> (PathBuf, usize) {
 fn run_command(socket: &PathBuf, cmd: &str, rest: &[String]) -> Result<String, String> {
     let map_err = |e: peercred_ipc::IpcError| e.to_string();
     match cmd {
-        "ping" => dioxus_debug::client::ping(socket).map(|()| "Pong".into()).map_err(map_err),
+        "ping" => dioxus_debug::client::ping(socket)
+            .map(|()| "Pong".into())
+            .map_err(map_err),
         "dump" => dioxus_debug::client::dump(socket).map_err(map_err),
         "click" => {
             let selector = rest.join(" ");
-            dioxus_debug::client::click(socket, &selector).map(|()| "Ok".into()).map_err(map_err)
+            dioxus_debug::client::click(socket, &selector)
+                .map(|()| "Ok".into())
+                .map_err(map_err)
         }
         "input" => run_input(socket, rest),
         "eval" => dioxus_debug::client::eval(socket, &rest.join(" ")).map_err(map_err),

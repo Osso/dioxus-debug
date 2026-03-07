@@ -13,9 +13,12 @@ pub fn dump<P: AsRef<Path>>(socket: P) -> Result<String, IpcError> {
 }
 
 pub fn click<P: AsRef<Path>>(socket: P, selector: &str) -> Result<(), IpcError> {
-    let resp: Response = Client::call(socket, &Request::Click {
-        selector: selector.to_string(),
-    })?;
+    let resp: Response = Client::call(
+        socket,
+        &Request::Click {
+            selector: selector.to_string(),
+        },
+    )?;
     match resp {
         Response::Ok => Ok(()),
         Response::Error(e) => Err(io_err(e)),
@@ -24,10 +27,13 @@ pub fn click<P: AsRef<Path>>(socket: P, selector: &str) -> Result<(), IpcError> 
 }
 
 pub fn input<P: AsRef<Path>>(socket: P, selector: &str, value: &str) -> Result<(), IpcError> {
-    let resp: Response = Client::call(socket, &Request::Input {
-        selector: selector.to_string(),
-        value: value.to_string(),
-    })?;
+    let resp: Response = Client::call(
+        socket,
+        &Request::Input {
+            selector: selector.to_string(),
+            value: value.to_string(),
+        },
+    )?;
     match resp {
         Response::Ok => Ok(()),
         Response::Error(e) => Err(io_err(e)),
@@ -36,9 +42,7 @@ pub fn input<P: AsRef<Path>>(socket: P, selector: &str, value: &str) -> Result<(
 }
 
 pub fn eval<P: AsRef<Path>>(socket: P, js: &str) -> Result<String, IpcError> {
-    let resp: Response = Client::call(socket, &Request::Eval {
-        js: js.to_string(),
-    })?;
+    let resp: Response = Client::call(socket, &Request::Eval { js: js.to_string() })?;
     match resp {
         Response::EvalResult(s) => Ok(s),
         Response::Error(e) => Err(io_err(e)),
@@ -55,7 +59,10 @@ pub fn screenshot<P: AsRef<Path>>(socket: P) -> Result<String, IpcError> {
     }
 }
 
-pub fn screenshot_to_file<P: AsRef<Path>, Q: AsRef<Path>>(socket: P, path: Q) -> Result<(), IpcError> {
+pub fn screenshot_to_file<P: AsRef<Path>, Q: AsRef<Path>>(
+    socket: P,
+    path: Q,
+) -> Result<(), IpcError> {
     let html = screenshot(socket)?;
     std::fs::write(path, html).map_err(IpcError::Io)?;
     Ok(())

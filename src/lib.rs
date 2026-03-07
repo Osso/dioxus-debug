@@ -52,7 +52,11 @@ async fn dispatch_command(cmd: server::Command) {
         server::Command::Click { selector, respond } => {
             let _ = respond.send(eval_to_result(&js::click_js(&selector)).await);
         }
-        server::Command::Input { selector, value, respond } => {
+        server::Command::Input {
+            selector,
+            value,
+            respond,
+        } => {
             let _ = respond.send(eval_to_result(&js::input_js(&selector, &value)).await);
         }
         server::Command::Eval { js, respond } => {
