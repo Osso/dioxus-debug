@@ -79,6 +79,7 @@ async fn eval_to_string(js: &str) -> String {
 }
 
 /// Eval JS and interpret "error:..." prefix as Err.
+/// Treats `EvalError::Finished` as success (click triggered a re-render).
 #[cfg(feature = "server")]
 async fn eval_to_result(js: &str) -> Result<(), String> {
     use dioxus::prelude::*;
@@ -91,7 +92,14 @@ async fn eval_to_result(js: &str) -> Result<(), String> {
                 Ok(())
             }
         }
-        Err(e) => Err(e.to_string()),
+        Err(e) => {
+            let msg = e.to_string();
+            if msg.contains("Finished") {
+                Ok(())
+            } else {
+                Err(msg)
+            }
+        }
     }
 }
 
