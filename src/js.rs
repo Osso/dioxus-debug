@@ -1,32 +1,28 @@
 /// Walk the DOM tree and return a JSON structure of all elements.
 pub const DUMP: &str = r#"
-function walk(node, depth) {
-    if (node.nodeType === Node.TEXT_NODE) {
-        var text = node.textContent.trim();
-        if (text) return { type: "text", text: text, depth: depth };
-        return null;
-    }
-    if (node.nodeType !== Node.ELEMENT_NODE) return null;
-    var el = node;
+var walk = function(el, depth) {
     var rect = el.getBoundingClientRect();
+    var text = "";
+    for (var t = 0; t < el.childNodes.length; t++) {
+        if (el.childNodes[t].nodeType === 3) text += el.childNodes[t].textContent.trim();
+    }
     var entry = {
-        type: "element",
         tag: el.tagName.toLowerCase(),
         id: el.id || null,
-        classes: el.className ? el.className.split(/\s+/).filter(Boolean) : [],
+        classes: el.className ? String(el.className).split(/\s+/).filter(Boolean) : [],
         x: Math.round(rect.x),
         y: Math.round(rect.y),
         width: Math.round(rect.width),
         height: Math.round(rect.height),
         depth: depth,
+        text: text || null,
         children: []
     };
-    for (var i = 0; i < el.childNodes.length; i++) {
-        var child = walk(el.childNodes[i], depth + 1);
-        if (child) entry.children.push(child);
+    for (var i = 0; i < el.children.length; i++) {
+        entry.children.push(walk(el.children[i], depth + 1));
     }
     return entry;
-}
+};
 return walk(document.body, 0);
 "#;
 
