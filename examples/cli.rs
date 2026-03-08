@@ -25,7 +25,7 @@ fn print_usage() {
     eprintln!("Usage: dioxus-debug <command> [args...]");
     eprintln!("       dioxus-debug --socket <path> <command> [args...]");
     eprintln!();
-    eprintln!("Commands: ping, dump, click <selector>, input <selector> <value>,");
+    eprintln!("Commands: ping, tree-dump, click <selector>, input <selector> <value>,");
     eprintln!("          eval <js>, screenshot <file>, script <file>");
 }
 
@@ -61,7 +61,7 @@ fn run_command(socket: &PathBuf, cmd: &str, rest: &[String]) -> Result<String, S
         "ping" => dioxus_debug::client::ping(socket)
             .map(|()| "Pong".into())
             .map_err(map_err),
-        "dump" => dioxus_debug::client::dump(socket).map_err(map_err),
+        "tree-dump" => dioxus_debug::client::tree_dump(socket).map_err(map_err),
         "click" => {
             let selector = rest.join(" ");
             dioxus_debug::client::click(socket, &selector)

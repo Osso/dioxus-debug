@@ -6,7 +6,7 @@ use tokio::sync::{mpsc, oneshot};
 
 #[derive(Debug)]
 pub enum Command {
-    Dump {
+    TreeDump {
         respond: oneshot::Sender<String>,
     },
     Click {
@@ -147,8 +147,8 @@ async fn dispatch_request(
     cmd_tx: &mpsc::Sender<Command>,
 ) {
     match req {
-        Request::Dump => {
-            let cmd = |tx| Command::Dump { respond: tx };
+        Request::TreeDump => {
+            let cmd = |tx| Command::TreeDump { respond: tx };
             handle_string_command(conn, cmd_tx, cmd).await;
         }
         Request::Click { selector } => {
@@ -175,7 +175,7 @@ async fn dispatch_request(
         }
         Request::Screenshot => {
             let cmd = |tx| Command::Screenshot { respond: tx };
-            handle_eval_command(conn, cmd_tx, cmd).await;
+            handle_screenshot_command(conn, cmd_tx, cmd).await;
         }
     }
 }
@@ -243,6 +243,31 @@ async fn handle_eval_command<F>(
     match tokio::time::timeout(std::time::Duration::from_secs(5), rx).await {
         Ok(Ok(Ok(s))) => {
             let _ = conn.write(&Response::EvalResult(s)).await;
+        }
+        Ok(Ok(Err(e))) => {
+            let _ = conn.write(&Response::Error(e)).await;
+        }
+        _ => {
+            let _ = conn.write(&Response::Error("Timeout".into())).await;
+        }
+    }
+}
+
+async fn handle_screenshot_command<F>(
+    conn: &mut peercred_ipc::Connection,
+    cmd_tx: &mpsc::Sender<Command>,
+    make_cmd: F,
+) where
+    F: FnOnce(oneshot::Sender<Result<String, String>>) -> Command,
+{
+    let (tx, rx) = oneshot::channel();
+    if cmd_tx.send(make_cmd(tx)).await.is_err() {
+        let _ = conn.write(&Response::Error("App closed".into())).await;
+        return;
+    }
+    match tokio::time::timeout(std::time::Duration::from_secs(10), rx).await {
+        Ok(Ok(Ok(s))) => {
+            let _ = conn.write(&Response::Screenshot(s)).await;
         }
         Ok(Ok(Err(e))) => {
             let _ = conn.write(&Response::Error(e)).await;

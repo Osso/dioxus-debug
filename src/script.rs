@@ -9,7 +9,7 @@ pub enum ScriptCommand {
     Input { selector: String, value: String },
     Wait(u64),
     Screenshot(String),
-    Dump,
+    TreeDump,
     Eval(String),
     Ping,
 }
@@ -56,7 +56,7 @@ fn parse_line(line: &str) -> Result<ScriptCommand, String> {
             }
             Ok(ScriptCommand::Screenshot(rest.to_string()))
         }
-        "dump" => Ok(ScriptCommand::Dump),
+        "tree-dump" => Ok(ScriptCommand::TreeDump),
         "eval" => {
             if rest.is_empty() {
                 return Err("eval requires a JS expression".into());
@@ -90,9 +90,9 @@ fn run_command(socket: &Path, cmd: &ScriptCommand) -> Result<(), String> {
         ScriptCommand::Screenshot(path) => {
             client::screenshot_to_file(socket, path).map_err(|e| format!("screenshot: {e}"))?;
         }
-        ScriptCommand::Dump => {
-            let dom = client::dump(socket).map_err(|e| format!("dump: {e}"))?;
-            println!("{dom}");
+        ScriptCommand::TreeDump => {
+            let tree = client::tree_dump(socket).map_err(|e| format!("tree-dump: {e}"))?;
+            println!("{tree}");
         }
         ScriptCommand::Eval(js) => {
             let result = client::eval(socket, js).map_err(|e| format!("eval: {e}"))?;

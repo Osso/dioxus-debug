@@ -12,11 +12,15 @@ tokio = { version = "1", features = ["sync", "time"], optional = true }
 glob = { version = "0.3", optional = true }
 libc = { version = "0.2", optional = true }
 dioxus = { version = "0.7", features = ["desktop"], optional = true }
+wry = { version = "0.53", optional = true }
+webkit2gtk = { version = "2.0", optional = true }
+cairo-rs = { version = "0.18", optional = true }
 base64 = { version = "0.22", optional = true }
+webp = { version = "0.3", optional = true }
 
 [features]
 default = []
-server = ["dep:peercred-ipc", "dep:serde_json", "dep:tokio", "dep:libc", "dep:dioxus", "dep:glob"]
+server = ["dep:peercred-ipc", "dep:serde_json", "dep:tokio", "dep:libc", "dep:dioxus", "dep:wry", "dep:webkit2gtk", "dep:cairo-rs", "dep:glob", "dep:base64", "dep:webp"]
 client = ["dep:peercred-ipc", "dep:serde_json", "dep:glob", "dep:base64"]
 script = ["client", "dep:tokio"]
 

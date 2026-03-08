@@ -7,11 +7,17 @@ pub mod server;
 #[cfg(feature = "server")]
 mod js;
 
+#[cfg(feature = "server")]
+mod screenshot;
+
 #[cfg(feature = "client")]
 pub mod client;
 
 #[cfg(feature = "script")]
 pub mod script;
+
+#[cfg(feature = "client")]
+pub mod tree;
 
 #[cfg(feature = "server")]
 pub use server::{Command, CommandReceiver};
@@ -27,7 +33,6 @@ pub use server::{Command, CommandReceiver};
 pub fn use_debug_server() {
     use dioxus::prelude::*;
 
-    // Use a signal to track if we've already initialized
     let mut initialized = use_signal(|| false);
 
     if !*initialized.read() {
@@ -46,7 +51,7 @@ pub fn use_debug_server() {
 #[cfg(feature = "server")]
 async fn dispatch_command(cmd: server::Command) {
     match cmd {
-        server::Command::Dump { respond } => {
+        server::Command::TreeDump { respond } => {
             let _ = respond.send(eval_to_string(js::DUMP).await);
         }
         server::Command::Click { selector, respond } => {
@@ -63,12 +68,12 @@ async fn dispatch_command(cmd: server::Command) {
             let _ = respond.send(eval_to_string_result(&js).await);
         }
         server::Command::Screenshot { respond } => {
-            let _ = respond.send(eval_to_string_result(js::SCREENSHOT).await);
+            let _ = respond.send(screenshot::capture_screenshot().await);
         }
     }
 }
 
-/// Eval JS and return the result as a string (for dump).
+/// Eval JS and return the result as a string (for tree-dump).
 #[cfg(feature = "server")]
 async fn eval_to_string(js: &str) -> String {
     use dioxus::prelude::*;

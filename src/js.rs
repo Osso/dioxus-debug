@@ -73,11 +73,6 @@ el.dispatchEvent(new Event("change", { bubbles: true }));
 return "ok";
 "#;
 
-/// Return the full page HTML as a screenshot proxy.
-pub const SCREENSHOT: &str = r#"
-return document.documentElement.outerHTML;
-"#;
-
 /// Build the JS string for a click command.
 pub fn click_js(selector: &str) -> String {
     if let Some(text) = selector.strip_prefix("text:") {
