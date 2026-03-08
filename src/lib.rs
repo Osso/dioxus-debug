@@ -8,7 +8,7 @@ pub mod server;
 mod js;
 
 #[cfg(feature = "server")]
-mod screenshot;
+pub mod screenshot;
 
 #[cfg(feature = "client")]
 pub mod client;
@@ -21,6 +21,32 @@ pub mod tree;
 
 #[cfg(feature = "server")]
 pub use server::{Command, CommandReceiver};
+
+/// Hook that captures a screenshot after the first render, saves it, and exits.
+///
+/// ```ignore
+/// dioxus_debug::use_screenshot("output.webp");
+/// ```
+#[cfg(feature = "server")]
+pub fn use_screenshot(path: &str) {
+    use dioxus::prelude::*;
+
+    let path = path.to_string();
+    let mut done = use_signal(|| false);
+
+    if !*done.read() {
+        done.set(true);
+        spawn(async move {
+            // Wait a bit for the UI to fully render
+            tokio::time::sleep(std::time::Duration::from_millis(500)).await;
+            match screenshot::screenshot_to_file(&path).await {
+                Ok(()) => eprintln!("Saved screenshot to {path}"),
+                Err(e) => eprintln!("Screenshot failed: {e}"),
+            }
+            std::process::exit(0);
+        });
+    }
+}
 
 /// Dioxus hook that spawns the IPC debug server and bridges commands to `document::eval()`.
 ///

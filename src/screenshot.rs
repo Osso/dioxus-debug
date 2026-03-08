@@ -14,6 +14,17 @@ pub async fn capture_screenshot() -> Result<String, String> {
     Ok(STANDARD.encode(&webp_bytes))
 }
 
+/// Capture a screenshot and save directly to a webp file.
+pub async fn screenshot_to_file(path: &str) -> Result<(), String> {
+    let desktop = window();
+    let wk_webview = desktop.webview.webview();
+
+    let surface = capture_surface(&wk_webview).await?;
+    let webp_bytes = surface_to_webp(surface)?;
+    std::fs::write(path, &webp_bytes).map_err(|e| format!("write failed: {e}"))?;
+    Ok(())
+}
+
 async fn capture_surface(
     wk: &webkit2gtk::WebView,
 ) -> Result<cairo::ImageSurface, String> {
@@ -24,8 +35,6 @@ async fn capture_surface(
         .await
         .map_err(|e| format!("webkit snapshot failed: {e}"))?;
 
-    // Convert generic Surface to ImageSurface by painting onto one.
-    // Use cairo_image_surface_get_width/height via the raw pointer.
     unsafe {
         let raw = surface.to_raw_none();
         let w = cairo::ffi::cairo_image_surface_get_width(raw);
