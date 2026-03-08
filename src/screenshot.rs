@@ -15,17 +15,22 @@ pub async fn capture_screenshot() -> Result<String, String> {
 }
 
 /// Capture a screenshot and save directly to a webp file.
-/// The image is scaled to match the logical window size (not device pixels).
+/// The image is scaled to match the CSS viewport size (not device pixels).
 pub async fn screenshot_to_file(path: &str) -> Result<(), String> {
+    use dioxus::prelude::*;
+
     let desktop = window();
     let wk_webview = desktop.webview.webview();
-    let logical_w = desktop.window.inner_size().width as f64
-        / desktop.window.scale_factor();
-    let logical_h = desktop.window.inner_size().height as f64
-        / desktop.window.scale_factor();
+
+    // Get CSS viewport size from the webview (this is what the user sees)
+    let size = document::eval("return {w: window.innerWidth, h: window.innerHeight}")
+        .await
+        .map_err(|e| format!("eval size: {e}"))?;
+    let css_w = size["w"].as_f64().unwrap_or(613.0) as u32;
+    let css_h = size["h"].as_f64().unwrap_or(732.0) as u32;
 
     let surface = capture_surface(&wk_webview).await?;
-    let webp_bytes = surface_to_webp_scaled(surface, logical_w as u32, logical_h as u32)?;
+    let webp_bytes = surface_to_webp_scaled(surface, css_w, css_h)?;
     std::fs::write(path, &webp_bytes).map_err(|e| format!("write failed: {e}"))?;
     Ok(())
 }
