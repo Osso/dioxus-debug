@@ -36,7 +36,7 @@ async fn capture_surface(
     use webkit2gtk::{SnapshotOptions, SnapshotRegion};
 
     let surface = wk
-        .snapshot_future(SnapshotRegion::FullDocument, SnapshotOptions::NONE)
+        .snapshot_future(SnapshotRegion::Visible, SnapshotOptions::NONE)
         .await
         .map_err(|e| format!("webkit snapshot failed: {e}"))?;
 
@@ -68,11 +68,6 @@ fn surface_to_webp_scaled(
     let src_h = surface.height() as f64;
     let tw = target_w as f64;
     let th = target_h as f64;
-
-    // If already the right size, skip scaling
-    if (src_w - tw).abs() < 1.0 && (src_h - th).abs() < 1.0 {
-        return surface_to_webp(surface);
-    }
 
     let scaled = cairo::ImageSurface::create(cairo::Format::ARgb32, target_w as i32, target_h as i32)
         .map_err(|e| format!("create scaled surface: {e}"))?;
