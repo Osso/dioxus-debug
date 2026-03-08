@@ -15,12 +15,17 @@ pub async fn capture_screenshot() -> Result<String, String> {
 }
 
 /// Capture a screenshot and save directly to a webp file.
+/// The image is scaled to match the logical window size (not device pixels).
 pub async fn screenshot_to_file(path: &str) -> Result<(), String> {
     let desktop = window();
     let wk_webview = desktop.webview.webview();
+    let logical_w = desktop.window.inner_size().width as f64
+        / desktop.window.scale_factor();
+    let logical_h = desktop.window.inner_size().height as f64
+        / desktop.window.scale_factor();
 
     let surface = capture_surface(&wk_webview).await?;
-    let webp_bytes = surface_to_webp(surface)?;
+    let webp_bytes = surface_to_webp_scaled(surface, logical_w as u32, logical_h as u32)?;
     std::fs::write(path, &webp_bytes).map_err(|e| format!("write failed: {e}"))?;
     Ok(())
 }
@@ -52,6 +57,33 @@ async fn capture_surface(
         img.flush();
         Ok(img)
     }
+}
+
+fn surface_to_webp_scaled(
+    surface: cairo::ImageSurface,
+    target_w: u32,
+    target_h: u32,
+) -> Result<Vec<u8>, String> {
+    let src_w = surface.width() as f64;
+    let src_h = surface.height() as f64;
+    let tw = target_w as f64;
+    let th = target_h as f64;
+
+    // If already the right size, skip scaling
+    if (src_w - tw).abs() < 1.0 && (src_h - th).abs() < 1.0 {
+        return surface_to_webp(surface);
+    }
+
+    let scaled = cairo::ImageSurface::create(cairo::Format::ARgb32, target_w as i32, target_h as i32)
+        .map_err(|e| format!("create scaled surface: {e}"))?;
+    let cr = cairo::Context::new(&scaled).map_err(|e| format!("cairo context: {e}"))?;
+    cr.scale(tw / src_w, th / src_h);
+    cr.set_source_surface(&surface, 0.0, 0.0)
+        .map_err(|e| format!("set source: {e}"))?;
+    cr.paint().map_err(|e| format!("paint: {e}"))?;
+    drop(cr);
+    scaled.flush();
+    surface_to_webp(scaled)
 }
 
 fn surface_to_webp(mut surface: cairo::ImageSurface) -> Result<Vec<u8>, String> {
