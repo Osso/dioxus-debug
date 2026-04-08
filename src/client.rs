@@ -20,27 +20,22 @@ pub fn tree_dump<P: AsRef<Path>>(socket: P) -> Result<String, IpcError> {
 }
 
 pub fn click<P: AsRef<Path>>(socket: P, selector: &str) -> Result<(), IpcError> {
-    let resp: Response = Client::call(
-        socket,
-        &Request::Click {
-            selector: selector.to_string(),
-        },
-    )?;
-    match resp {
-        Response::Ok => Ok(()),
-        Response::Error(e) => Err(io_err(e)),
-        _ => Err(io_err("Unexpected response")),
-    }
+    let req = Request::Click {
+        selector: selector.to_string(),
+    };
+    send_ok_request(socket, &req)
 }
 
 pub fn input<P: AsRef<Path>>(socket: P, selector: &str, value: &str) -> Result<(), IpcError> {
-    let resp: Response = Client::call(
-        socket,
-        &Request::Input {
-            selector: selector.to_string(),
-            value: value.to_string(),
-        },
-    )?;
+    let req = Request::Input {
+        selector: selector.to_string(),
+        value: value.to_string(),
+    };
+    send_ok_request(socket, &req)
+}
+
+fn send_ok_request<P: AsRef<Path>>(socket: P, req: &Request) -> Result<(), IpcError> {
+    let resp: Response = Client::call(socket, req)?;
     match resp {
         Response::Ok => Ok(()),
         Response::Error(e) => Err(io_err(e)),

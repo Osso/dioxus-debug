@@ -35,9 +35,7 @@ pub async fn screenshot_to_file(path: &str) -> Result<(), String> {
     Ok(())
 }
 
-async fn capture_surface(
-    wk: &webkit2gtk::WebView,
-) -> Result<cairo::ImageSurface, String> {
+async fn capture_surface(wk: &webkit2gtk::WebView) -> Result<cairo::ImageSurface, String> {
     use webkit2gtk::{SnapshotOptions, SnapshotRegion};
 
     let surface = wk
@@ -74,8 +72,9 @@ fn surface_to_webp_scaled(
     let tw = target_w as f64;
     let th = target_h as f64;
 
-    let scaled = cairo::ImageSurface::create(cairo::Format::ARgb32, target_w as i32, target_h as i32)
-        .map_err(|e| format!("create scaled surface: {e}"))?;
+    let scaled =
+        cairo::ImageSurface::create(cairo::Format::ARgb32, target_w as i32, target_h as i32)
+            .map_err(|e| format!("create scaled surface: {e}"))?;
     let cr = cairo::Context::new(&scaled).map_err(|e| format!("cairo context: {e}"))?;
     cr.scale(tw / src_w, th / src_h);
     cr.set_source_surface(&surface, 0.0, 0.0)
