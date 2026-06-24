@@ -97,3 +97,40 @@ fn escape_js(s: &str) -> String {
         .replace('\n', "\\n")
         .replace('\r', "\\r")
 }
+
+#[cfg(test)]
+mod tests {
+    use super::{DUMP, click_js, input_js};
+
+    #[test]
+    fn dump_script_walks_from_document_body() {
+        assert!(DUMP.contains("return walk(document.body, 0);"));
+        assert!(DUMP.contains("getBoundingClientRect"));
+    }
+
+    #[test]
+    fn click_selector_escapes_css_selector() {
+        let js = click_js(r#"button[data-name="Save\Now"]"#);
+
+        assert!(js.contains(r#"document.querySelector("button[data-name=\"Save\\Now\"]")"#));
+        assert!(js.contains(r#"Element not found: button[data-name=\"Save\\Now\"]"#));
+    }
+
+    #[test]
+    fn click_text_uses_exact_text_search() {
+        let js = click_js("text:Save changes");
+
+        assert!(js.contains("document.querySelectorAll(\"*\")"));
+        assert!(js.contains(r#"=== "Save changes""#));
+        assert!(!js.contains("{TEXT}"));
+    }
+
+    #[test]
+    fn input_escapes_selector_and_value() {
+        let js = input_js("#name", "Alessio's\nLaptop");
+
+        assert!(js.contains(r##"document.querySelector("#name")"##));
+        assert!(js.contains(r#"nativeSetter.call(el, "Alessio\'s\nLaptop")"#));
+        assert!(!js.contains("{VALUE}"));
+    }
+}

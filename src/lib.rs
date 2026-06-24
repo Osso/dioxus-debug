@@ -1,10 +1,10 @@
-#[cfg(any(feature = "server", feature = "client"))]
+#[cfg(any(feature = "server", feature = "client", test))]
 pub mod types;
 
 #[cfg(feature = "server")]
 pub mod server;
 
-#[cfg(feature = "server")]
+#[cfg(any(feature = "server", test))]
 mod js;
 
 #[cfg(feature = "server")]
@@ -13,10 +13,10 @@ pub mod screenshot;
 #[cfg(feature = "client")]
 pub mod client;
 
-#[cfg(feature = "script")]
+#[cfg(any(feature = "script", test))]
 pub mod script;
 
-#[cfg(feature = "client")]
+#[cfg(any(feature = "client", test))]
 pub mod tree;
 
 #[cfg(feature = "server")]

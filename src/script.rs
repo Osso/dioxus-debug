@@ -1,9 +1,12 @@
+#[cfg(feature = "script")]
 use std::path::Path;
+#[cfg(feature = "script")]
 use std::time::Duration;
 
+#[cfg(feature = "script")]
 use crate::client;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum ScriptCommand {
     Click(String),
     Input { selector: String, value: String },
@@ -68,6 +71,7 @@ fn parse_line(line: &str) -> Result<ScriptCommand, String> {
     }
 }
 
+#[cfg(feature = "script")]
 pub fn run_script<P: AsRef<Path>>(socket: P, commands: &[ScriptCommand]) -> Result<(), String> {
     let socket = socket.as_ref();
     for cmd in commands {
@@ -76,6 +80,7 @@ pub fn run_script<P: AsRef<Path>>(socket: P, commands: &[ScriptCommand]) -> Resu
     Ok(())
 }
 
+#[cfg(feature = "script")]
 fn run_command(socket: &Path, cmd: &ScriptCommand) -> Result<(), String> {
     match cmd {
         ScriptCommand::Click(selector) => {
@@ -104,4 +109,72 @@ fn run_command(socket: &Path, cmd: &ScriptCommand) -> Result<(), String> {
         }
     }
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{ScriptCommand, parse_script};
+
+    #[test]
+    fn parses_commands_and_skips_blank_lines_and_comments() {
+        let script = r#"
+            # setup
+            ping
+            click #save
+            input #name Alessio Deiana
+            wait 250
+            screenshot /tmp/app.webp
+            tree-dump
+            eval return document.title
+        "#;
+
+        let commands = parse_script(script).unwrap();
+
+        assert_eq!(
+            commands,
+            vec![
+                ScriptCommand::Ping,
+                ScriptCommand::Click("#save".to_string()),
+                ScriptCommand::Input {
+                    selector: "#name".to_string(),
+                    value: "Alessio Deiana".to_string()
+                },
+                ScriptCommand::Wait(250),
+                ScriptCommand::Screenshot("/tmp/app.webp".to_string()),
+                ScriptCommand::TreeDump,
+                ScriptCommand::Eval("return document.title".to_string()),
+            ]
+        );
+    }
+
+    #[test]
+    fn annotates_parse_errors_with_line_number() {
+        let err = parse_script("\nwait soon").unwrap_err();
+
+        assert_eq!(err, "Line 2: wait requires milliseconds");
+    }
+
+    #[test]
+    fn rejects_missing_command_arguments() {
+        assert_eq!(
+            parse_script("click").unwrap_err(),
+            "Line 1: click requires a selector"
+        );
+        assert_eq!(
+            parse_script("input #name").unwrap_err(),
+            "Line 1: input requires selector and value"
+        );
+        assert_eq!(
+            parse_script("screenshot").unwrap_err(),
+            "Line 1: screenshot requires a file path"
+        );
+        assert_eq!(
+            parse_script("eval").unwrap_err(),
+            "Line 1: eval requires a JS expression"
+        );
+        assert_eq!(
+            parse_script("hover #name").unwrap_err(),
+            "Line 1: Unknown command: hover"
+        );
+    }
 }

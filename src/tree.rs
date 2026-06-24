@@ -59,3 +59,67 @@ fn truncate(s: &str, max: usize) -> String {
         format!("{}...", &s[..max])
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::format_tree;
+
+    #[test]
+    fn formats_nested_dom_with_metadata() {
+        let json = r##"{
+            "tag": "body",
+            "id": null,
+            "classes": [],
+            "x": 0,
+            "y": 0,
+            "width": 320,
+            "height": 200,
+            "text": null,
+            "children": [
+                {
+                    "tag": "button",
+                    "id": "save",
+                    "classes": ["primary", "wide"],
+                    "x": 10,
+                    "y": 20,
+                    "width": 90,
+                    "height": 30,
+                    "text": "Save",
+                    "children": []
+                }
+            ]
+        }"##;
+
+        let tree = format_tree(json).unwrap();
+
+        assert_eq!(
+            tree,
+            "- body [x=0 y=0 w=320 h=200]\n  - button #save .primary .wide \"Save\" [x=10 y=20 w=90 h=30]"
+        );
+    }
+
+    #[test]
+    fn omits_empty_text_and_zero_size() {
+        let json = r#"{"tag":"span","text":"","children":[]}"#;
+
+        let tree = format_tree(json).unwrap();
+
+        assert_eq!(tree, "- span");
+    }
+
+    #[test]
+    fn truncates_long_text() {
+        let json = format!(r#"{{"tag":"p","text":"{}","children":[]}}"#, "a".repeat(61));
+
+        let tree = format_tree(&json).unwrap();
+
+        assert_eq!(tree, format!("- p \"{}...\"", "a".repeat(60)));
+    }
+
+    #[test]
+    fn reports_invalid_json() {
+        let err = format_tree("{not valid").unwrap_err();
+
+        assert!(err.starts_with("Invalid JSON:"));
+    }
+}

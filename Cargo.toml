@@ -18,6 +18,9 @@ cairo-rs = { version = "0.18", optional = true }
 base64 = { version = "0.22", optional = true }
 webp = { version = "0.3", optional = true }
 
+[dev-dependencies]
+serde_json = "1"
+
 [features]
 default = []
 server = ["dep:peercred-ipc", "dep:serde_json", "dep:tokio", "dep:libc", "dep:dioxus", "dep:wry", "dep:webkit2gtk", "dep:cairo-rs", "dep:glob", "dep:base64", "dep:webp"]
